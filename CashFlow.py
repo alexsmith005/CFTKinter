@@ -1,37 +1,42 @@
+import tkinter as tk
+from tkinter import ttk
+import tkcalendar
+import datetime as dt
+
 class CashFlow:
 
     def __init__(self):
-        import tkinter as tk
-        from tkinter import ttk
-        import tkcalendar
-
+        self.reset_num = 0
         #Initialize Tk
         self.root = tk.Tk()
         #Build the Calendar
         self.buildCal()
         ttk.Button(self.root, text='Calendar').pack(padx=75, pady=75)
-
         self.root.mainloop()
 
     def print_sel(self):
-        import datetime as dt
+        #Create Variable for selected date
         self.temp_sel = self.cal.selection_get()       
-        #if self.cal.calevents == None:
-            #self.cal.calevent_create(date=self.cal.selection_get(), text='Expense', tags=600)
-        if self.cal.get_calevents(date=self.temp_sel) == None:
-            self.cal.calevent_create(date=self.temp_sel, text='Expense', tags=600)
-        self.cal.calevent_create(date=self.temp_sel, text=600, tags="Expense")
-        print(self.cal.get_calevents(date=self.temp_sel, tag='Expense'))
-        print(self.cal.calevent_cget(ev_id=0, option='text'))
-        self.cal.see(self.cal.selection_get())
+        #Create event on the selected date and save the event id
+        self.curr_id = self.cal.calevent_create(date=self.temp_sel, text=600, tags=["Expense", "red"])
+        #self.cal.calevent_create(date=self.temp_sel, text=600, tags="Expense")
+        #Variable for date's IDs
+        self.date_id = self.cal.get_calevents(date=self.temp_sel, tag='Expense')
+        #Variable to look into the Event's keys
+        self.shortcut = self.cal.tooltip_wrapper
+        self.shortbut = list(self.shortcut.widgets.keys())[0]
+        #ttk.Button(self.top, text=self.cal.calevent_cget(ev_id=self.curr_id, option='tag')).pack_configure(expand=False, in_=self.shortbut)
+        self.cal.tooltip_wrapper.configure()
+        self.top.wm_deiconify()
+        """if self.reset_num <= 1:
+            self.reset_num += 1
+            self.top.wm_state('zoomed')
+            self.top.wm_state('normal')"""
+        #self.cal.see(self.cal.selection_get())
+        #self.expense_button.update_idletasks()
+        
 
     def buildCal(self):
-        import tkinter as tk
-        from tkinter import ttk
-        import datetime as dt
-
-        import tkcalendar
-
         self.top = tk.Toplevel(self.root)
         self.today = dt.date.today()
 
@@ -39,11 +44,16 @@ class CashFlow:
         maxdate = self.today + dt.timedelta(days=730)
 
         self.cal = tkcalendar.Calendar(self.top, font="Arial 14", selectmode='day', locale='en_US',
-                   mindate=mindate, maxdate=maxdate, disabledforeground='red', firstweekday='sunday',
-                   cursor="hand2", year=self.today.year, month=self.today.month, day=self.today.day)
+                state='normal', mindate=mindate, maxdate=maxdate, disabledforeground='red', firstweekday='sunday',
+                cursor="hand1", year=self.today.year, month=self.today.month, day=self.today.day, tooltipalpha=1,
+                tooltipbackground='grey', tooltipdelay=1, tooltipforeground='blue')
 
         self.cal.pack(fill="both", expand=True)
-        ttk.Button(self.top, text="ok", command=self.print_sel).pack()
+        self.top.wm_state('normal')
+        self.expense_button = ttk.Button(self.top, text="Expense", command=self.print_sel)
+
+        self.expense_button.pack()
+
         
 
     def userExpenses(self):
@@ -57,7 +67,7 @@ class CashFlow:
 
 def main():
 
-    get_cal = CashFlow()
+    CashFlow()
 
 
 if __name__ == '__main__':
