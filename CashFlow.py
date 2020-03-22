@@ -6,7 +6,6 @@ import datetime as dt
 class CashFlow:
 
     def __init__(self):
-        self.reset_num = 0
         #Initialize Tk
         self.root = tk.Tk()
         #Build the Calendar
@@ -14,11 +13,13 @@ class CashFlow:
         ttk.Button(self.root, text='Calendar').pack(padx=75, pady=75)
         self.root.mainloop()
 
-    def print_sel(self):
+    def add_expense(self):
+        #Set Expense color
+        self.cal.tooltip_wrapper.configure(foreground='red')
         #Create Variable for selected date
         self.temp_sel = self.cal.selection_get()       
         #Create event on the selected date and save the event id
-        self.curr_id = self.cal.calevent_create(date=self.temp_sel, text=600, tags=["Expense", "red"])
+        self.curr_id = self.cal.calevent_create(date=self.temp_sel, text=600, tags=["Expense"])
         #self.cal.calevent_create(date=self.temp_sel, text=600, tags="Expense")
         #Variable for date's IDs
         self.date_id = self.cal.get_calevents(date=self.temp_sel, tag='Expense')
@@ -34,6 +35,26 @@ class CashFlow:
             self.top.wm_state('normal')"""
         #self.cal.see(self.cal.selection_get())
         #self.expense_button.update_idletasks()
+
+    def add_income(self):
+        print(self.cal.tooltip_wrapper.widgets)
+        #Create Variable for selected date
+        self.temp_sel = self.cal.selection_get()       
+        #Create event on the selected date and save the event id
+        self.curr_id = self.cal.calevent_create(date=self.temp_sel, text=600, tags=["Income"])
+        #self.cal.calevent_create(date=self.temp_sel, text=600, tags="Expense")
+        #Set Income color
+        #self.cal.tooltip_wrapper.configure(widget=list(self.cal.tooltip_wrapper.widgets.values())[0], foreground='green')
+        print(self.cal.tooltip_wrapper.configure())
+        #Variable for date's IDs
+        self.date_id = self.cal.get_calevents(date=self.temp_sel, tag='Income')
+        #Variable to look into the Event's keys
+        self.shortcut = self.cal.tooltip_wrapper
+        self.shortbut = list(self.shortcut.widgets.keys())[0]
+        #ttk.Button(self.top, text=self.cal.calevent_cget(ev_id=self.curr_id, option='tag')).pack_configure(expand=False, in_=self.shortbut)
+        self.top.wm_deiconify()
+        #self.cal.see(self.cal.selection_get())
+        #self.expense_button.update_idletasks()
         
 
     def buildCal(self):
@@ -46,13 +67,15 @@ class CashFlow:
         self.cal = tkcalendar.Calendar(self.top, font="Arial 14", selectmode='day', locale='en_US',
                 state='normal', mindate=mindate, maxdate=maxdate, disabledforeground='red', firstweekday='sunday',
                 cursor="hand1", year=self.today.year, month=self.today.month, day=self.today.day, tooltipalpha=1,
-                tooltipbackground='grey', tooltipdelay=1, tooltipforeground='blue')
+                tooltipbackground='white', tooltipdelay=0)
 
         self.cal.pack(fill="both", expand=True)
         self.top.wm_state('normal')
-        self.expense_button = ttk.Button(self.top, text="Expense", command=self.print_sel)
+        self.expense_button = ttk.Button(self.top, text="Expense", command=self.add_expense)
+        self.income_button = ttk.Button(self.top, text="Income", command=self.add_income)
 
-        self.expense_button.pack()
+        self.expense_button.pack_configure(expand=True, fill="both", side="right")
+        self.income_button.pack_configure(expand=True, fill="both", side="left")
 
         
 
