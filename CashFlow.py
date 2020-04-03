@@ -8,6 +8,7 @@ import calendar
 class CashFlow:
 
     def __init__(self):
+        #New Commit
         self.start_money = 1000
         self.updates_list = []
         self.todays_money = []
