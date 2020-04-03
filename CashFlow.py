@@ -1,3 +1,4 @@
+import tkinter as tk
 from tkinter import ttk
 import tkcalendar
 import datetime as dt
@@ -30,15 +31,10 @@ class CashFlow:
             self.conn.close()
 
     def add_expense(self):
-        #Set Expense color
-        self.cal.tooltip_wrapper.configure(foreground='red')
         #Create Variable for selected date
-        self.temp_sel = self.cal.selection_get()       
         self.temp_sel = self.cal.selection_get()
         print(self.temp_sel)
         #Create event on the selected date and save the event id
-        self.curr_id = self.cal.calevent_create(date=self.temp_sel, text=600, tags=["Expense"])
-        #self.cal.calevent_create(date=self.temp_sel, text=600, tags="Expense")
         self.events_id = self.cal.calevent_create(date=self.temp_sel, text=600, tags=["Expense"])
         self.updates_list.append(self.events_id)
         #Variable for date's IDs
@@ -47,16 +43,6 @@ class CashFlow:
         self.amount = self.cal.calevent_cget(ev_id=self.events_id, option='text')
         #Variable to look into the Event's keys
         self.shortcut = self.cal.tooltip_wrapper
-        self.shortbut = list(self.shortcut.widgets.keys())[0]
-        #ttk.Button(self.top, text=self.cal.calevent_cget(ev_id=self.curr_id, option='tag')).pack_configure(expand=False, in_=self.shortbut)
-        self.cal.tooltip_wrapper.configure()
-        self.top.wm_deiconify()
-        """if self.reset_num <= 1:
-            self.reset_num += 1
-            self.top.wm_state('zoomed')
-            self.top.wm_state('normal')"""
-        #self.cal.see(self.cal.selection_get())
-        #self.expense_button.update_idletasks()
         self.shortbut = list(self.shortcut.widgets.keys())[-1]
         #Create a Button representing Expense added
         self.expense_added = tk.Button(self.top, text=self.cal.calevent_cget(ev_id=self.events_id, option='text'), fg='red')
@@ -66,20 +52,12 @@ class CashFlow:
         self.expense_id = self.cursor.fetchone()[0]
         print(self.expense_id)
         self.conn.commit()
-
+        
 #Think about heirarchy for tables. Do I need a master table that holds the user ID that dives into the separate table IDs?
 #Look into SQL setup overall to answer this question and how other databases are set up. (professional examples)
 
     def add_income(self):
-        print(self.cal.tooltip_wrapper.widgets)
         #Create Variable for selected date
-        self.temp_sel = self.cal.selection_get()       
-        #Create event on the selected date and save the event id
-        self.curr_id = self.cal.calevent_create(date=self.temp_sel, text=600, tags=["Income"])
-        #self.cal.calevent_create(date=self.temp_sel, text=600, tags="Expense")
-        #Set Income color
-        #self.cal.tooltip_wrapper.configure(widget=list(self.cal.tooltip_wrapper.widgets.values())[0], foreground='green')
-        print(self.cal.tooltip_wrapper.configure())
         self.temp_sel = self.cal.selection_get()
         #Create event on the selected date
         self.events_id = self.cal.calevent_create(date=self.temp_sel, text=600, tags=["Income", self.temp_sel])
@@ -90,12 +68,6 @@ class CashFlow:
         self.amount = self.cal.calevent_cget(ev_id=self.events_id, option='text')
         #Variable to look into the Event's keys
         self.shortcut = self.cal.tooltip_wrapper
-        self.shortbut = list(self.shortcut.widgets.keys())[0]
-        #ttk.Button(self.top, text=self.cal.calevent_cget(ev_id=self.curr_id, option='tag')).pack_configure(expand=False, in_=self.shortbut)
-        self.top.wm_deiconify()
-        #self.cal.see(self.cal.selection_get())
-        #self.expense_button.update_idletasks()
-
         self.shortbut = list(self.shortcut.widgets.keys())[-1]
         #Create a Button representing Income added on each month
         self.income_added = tk.Button(self.top, text=self.cal.calevent_cget(ev_id=self.events_id, option='text'), fg='green')
@@ -124,13 +96,15 @@ class CashFlow:
 
     def buildCal(self):
         self.top = tk.Toplevel(self.root)
-@@ -68,25 +105,192 @@ def buildCal(self):
+        self.today = dt.date.today()
+
+        mindate = self.today.replace(day=1, month=1)
+        maxdate = self.today + dt.timedelta(days=730)
+
+        self.cal = tkcalendar.Calendar(self.top, font="Arial 14", selectmode='day', locale='en_US',
                 state='normal', mindate=mindate, maxdate=maxdate, disabledforeground='red', firstweekday='sunday',
                 cursor="hand1", year=self.today.year, month=self.today.month, day=self.today.day, tooltipalpha=1,
                 tooltipbackground='white', tooltipdelay=0)
-
-        self.cal.pack(fill="both", expand=True)
-        self.top.wm_state('normal')
         #self.top.wm_state('zoomed')
         self.cal.pack(fill='both', expand=True)
         self.enter_amt = ttk.Entry(self.top)
@@ -140,14 +114,11 @@ class CashFlow:
         #if self.enter_amt != 0:
         #    self.start_money_button = ttk.Button(self.top, text="Set Start Money", command=self.setStartMoney(self.enter_amt))
 
-        self.expense_button.pack_configure(expand=True, fill="both", side="right")
-        self.income_button.pack_configure(expand=True, fill="both", side="left")
         self.expense_button.pack_configure(expand=True, fill='both', side="right")
         self.income_button.pack_configure(expand=True, fill='both', side="left")
         self.calculate_button.pack_configure(fill='both', side='top')
         #self.start_money_button.pack_configure(fill='both', side='bottom')
         self.enter_amt.pack_configure(fill='both', side='bottom')
-
 
         #Reconfigure month and year buttons to change the calendar and change the displayed events to match
         self.cal._l_month.configure(command=self._left_month_command)
@@ -221,11 +192,11 @@ class CashFlow:
         changes_made = 0
         self.active_tables = []
         self.conn = psycopg2.connect(
-            host = 'cashflowdb1.cmeg9dsgi2se.us-east-2.rds.amazonaws.com',
-            port = 5432,
-            user = 'postgres',
-            password = 'Q6MXmMpNgdBB00DFtqOk',
-            database='myCashDB'
+            host = ***,
+            port = ***,
+            user = ***,
+            password = ***,
+            database=***
         )
         self.cursor = self.conn.cursor()
         #read current tables
@@ -263,7 +234,7 @@ class CashFlow:
         self.cursor.execute("""DROP TABLE expense""")
         self.cursor.execute("""DROP TABLE income""")
         self.conn.commit()
-
+    
     def cleanDB(self):
         #Delete DB entries for clean testing
         self.cursor.execute("""DELETE FROM income""")
@@ -272,12 +243,10 @@ class CashFlow:
         self.conn.commit()
 
     def userExpenses(self):
-        pass
         self.cursor.execute("""SELECT * FROM expense""")
         return self.cursor.fetchall()
 
     def userIncome(self):
-        pass
         self.cursor.execute("""SELECT * FROM income""")
         return self.cursor.fetchall()
 
@@ -308,7 +277,6 @@ class CashFlow:
 #        self._btns_date_range()
 
     def updateCal(self):
-        pass
         print(self.cal._calendar)
         for items in self.todays_money:
             items.pack_forget()
@@ -319,9 +287,15 @@ class CashFlow:
             if day in self.cash_dates[0:-1][0]:
                 pass
         print(first_day, last_day, day_coords)
-
-
+        
+        
         #print(self.cal._calendar)
-
+        
 
 def main():
+
+    CashFlow()
+
+
+if __name__ == '__main__':
+    main()
