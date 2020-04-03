@@ -192,11 +192,11 @@ class CashFlow:
         changes_made = 0
         self.active_tables = []
         self.conn = psycopg2.connect(
-            host = 'cashflowdb1.cmeg9dsgi2se.us-east-2.rds.amazonaws.com',
-            port = 5432,
-            user = 'postgres',
-            password = 'Q6MXmMpNgdBB00DFtqOk',
-            database='myCashDB'
+            host = ***,
+            port = ***,
+            user = ***,
+            password = ***,
+            database=***
         )
         self.cursor = self.conn.cursor()
         #read current tables
